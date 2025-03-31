@@ -1,3 +1,4 @@
+// src/components/layout/Navbar.tsx
 import React from 'react';
 import {
   AppBar,
@@ -18,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
 import { toggleTheme } from '../../store/slices/themeSlice';
+import { motion } from 'framer-motion';
 
 const Navbar: React.FC = () => {
   const theme = useTheme();
@@ -27,7 +29,19 @@ const Navbar: React.FC = () => {
   const themeMode = useSelector((state: RootState) => state.theme.mode);
 
   return (
-    <AppBar position="fixed" sx={{ zIndex: theme.zIndex.drawer + 1 }}>
+    <AppBar 
+      position="fixed" 
+      sx={{ zIndex: theme.zIndex.drawer + 1 }}
+      component={motion.div}
+      initial={{ y: -70 }}
+      animate={{ y: 0 }}
+      transition={{ 
+        type: 'spring', 
+        stiffness: 120, 
+        damping: 20,
+        delay: 0.2 
+      }}
+    >
       <Toolbar>
         {isMobile && (
           <IconButton
@@ -35,12 +49,23 @@ const Navbar: React.FC = () => {
             edge="start"
             sx={{ mr: 2 }}
             onClick={() => {/* TODO: Implement mobile menu toggle */}}
+            component={motion.button}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
           >
             <MenuIcon />
           </IconButton>
         )}
         
-        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+        <Typography 
+          variant="h6" 
+          noWrap 
+          component={motion.div}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          sx={{ flexGrow: 1 }}
+        >
           ColdStorageHub
         </Typography>
 
@@ -49,6 +74,10 @@ const Navbar: React.FC = () => {
             color="inherit"
             onClick={() => dispatch(toggleTheme())}
             title={themeMode === 'light' ? t('settings.darkMode') : t('settings.lightMode')}
+            component={motion.button}
+            whileHover={{ scale: 1.1, rotate: 180 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.3 }}
           >
             {themeMode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
           </IconButton>
@@ -57,6 +86,9 @@ const Navbar: React.FC = () => {
             color="inherit"
             onClick={() => {/* TODO: Implement language selector */}}
             title={t('settings.language')}
+            component={motion.button}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
           >
             <LanguageIcon />
           </IconButton>
@@ -66,4 +98,4 @@ const Navbar: React.FC = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;

@@ -6,7 +6,7 @@ import { Booking } from '../types';
 import { useTheme } from '@mui/material/styles';
 import EditIcon from '@mui/icons-material/Edit';
 import BookingForm from '../components/BookingForm';
-
+//
 const Bookings: React.FC = () => {
   const { t } = useTranslation();
   const theme = useTheme();

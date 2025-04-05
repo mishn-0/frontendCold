@@ -26,6 +26,8 @@ import { useTranslation } from 'react-i18next';
 import { StorageUnit } from '../types';
 import { storageUnitService } from '../services/storageUnitService';
 import { useTheme } from '@mui/material/styles';
+import { warehouseService } from '../services/warehouseService';
+import { Warehouse } from '../types';
 
 const StorageUnits: React.FC = () => {
   const { t } = useTranslation();
@@ -35,6 +37,7 @@ const StorageUnits: React.FC = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState<StorageUnit | null>(null);
   const theme = useTheme();
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
 
   const fetchUnits = async () => {
     try {
@@ -50,8 +53,18 @@ const StorageUnits: React.FC = () => {
     }
   };
 
+  const fetchWarehouses = async () => {
+    try {
+      const data = await warehouseService.getAll();
+      setWarehouses(data);
+    } catch (err) {
+      console.error('Error fetching warehouses:', err);
+    }
+  };
+
   useEffect(() => {
     fetchUnits();
+    fetchWarehouses();
   }, []);
 
   const handleCreate = () => {
@@ -143,7 +156,7 @@ const StorageUnits: React.FC = () => {
                 }}
               >
                 <TableCell>{unit.name}</TableCell>
-                <TableCell>{unit.warehouseId}</TableCell>
+                <TableCell>{warehouses.find(warehouse => warehouse.warehouseId === unit.warehouseId)?.name || 'Unknown Warehouse'}</TableCell>
                 <TableCell>
                   {unit.width}m × {unit.height}m × {unit.depth}m
                 </TableCell>

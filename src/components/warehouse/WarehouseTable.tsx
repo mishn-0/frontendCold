@@ -10,10 +10,12 @@ import {
   IconButton,
   Box,
   useTheme,
+  Chip,
 } from '@mui/material';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
+  Check as CheckIcon,
 } from '@mui/icons-material';
 import { Warehouse } from '../../services/warehouseService';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +25,15 @@ interface WarehouseTableProps {
   onEdit?: (warehouse: Warehouse) => void;
   onDelete?: (id: number) => void;
 }
+
+// Define types for amenities
+type AmenityObject = {
+  type: string;
+  available: boolean;
+  description: string;
+};
+
+type AmenityString = string;
 
 const WarehouseTable: React.FC<WarehouseTableProps> = ({
   warehouses,
@@ -45,8 +56,80 @@ const WarehouseTable: React.FC<WarehouseTableProps> = ({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
+  // Improved function to handle different amenity formats
+  const renderAmenities = (warehouse: Warehouse) => {
+    if (!warehouse.amenities || warehouse.amenities.length === 0) {
+      return <span>No amenities</span>;
+    }
+
+    return (
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+        {Array.isArray(warehouse.amenities) && warehouse.amenities.map((amenity, idx) => {
+          // Check if amenity is a string or an object
+          const isStringAmenity = typeof amenity === 'string';
+          
+          if (isStringAmenity) {
+            // Handle string amenity
+            return (
+              <Chip
+                key={`${warehouse.warehouseId}-amenity-${idx}`}
+                label={amenity as string}
+                size="small"
+                color="primary"
+                icon={<CheckIcon fontSize="small" />}
+                sx={{
+                  textTransform: 'capitalize',
+                  m: 0.2
+                }}
+              />
+            );
+          } else {
+            // Handle object amenity
+            const amenityObj = amenity as AmenityObject;
+            return (
+              <Chip
+                key={`${warehouse.warehouseId}-amenity-${idx}`}
+                label={amenityObj.type}
+                title={amenityObj.description}
+                size="small"
+                color={amenityObj.available ? "success" : "default"}
+                icon={amenityObj.available ? <CheckIcon fontSize="small" /> : undefined}
+                sx={{
+                  textTransform: 'capitalize',
+                  m: 0.2
+                }}
+              />
+            );
+          }
+        })}
+      </Box>
+    );
+  };
+
+  // Function to format operating hours correctly
+  const renderOperatingHours = (warehouse: Warehouse) => {
+    const operatingHours = warehouse.operatingHours;
+
+    // Check if operatingHours has weekdays array format
+    if (operatingHours?.weekdays && Array.isArray(operatingHours.weekdays)) {
+      return (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          {operatingHours.weekdays.map((day, index) => (
+            <Box
+              key={index}
+              sx={{
+                fontSize: '0.75rem',
+                color: theme.palette.text.secondary
+              }}
+            >
+              {day.day}: {day.open && day.close ? `${day.open} - ${day.close}` : 'Closed'}
+            </Box>
+          ))}
+        </Box>
+      );
+    }
+
+    return null; // Return null if no operating hours are available
   };
 
   return (
@@ -83,10 +166,6 @@ const WarehouseTable: React.FC<WarehouseTableProps> = ({
                       warehouse.status === 'active' ? theme.palette.success.light :
                       warehouse.status === 'maintenance' ? theme.palette.warning.light :
                       theme.palette.error.light,
-                    //color: 
-                      //warehouse.status === 'active' ? theme.palette.success.dark :
-                      //warehouse.status === 'maintenance' ? theme.palette.warning.dark :
-                      //theme.palette.error.dark,
                     textTransform: 'capitalize',
                     fontWeight: 'medium'
                   }}
@@ -96,40 +175,10 @@ const WarehouseTable: React.FC<WarehouseTableProps> = ({
               </TableCell>
               <TableCell>{warehouse.address}</TableCell>
               <TableCell>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {warehouse.amenities?.map((amenity, index) => (
-                    <Box
-                      key={index}
-                      sx={{
-                        display: 'inline-block',
-                        px: 1,
-                        py: 0.5,
-                        borderRadius: 1,
-                        backgroundColor: theme.palette.secondary.light,
-                        color: theme.palette.secondary.dark,
-                        textTransform: 'capitalize',
-                        fontSize: '0.75rem'
-                      }}
-                    >
-                      {amenity.type} - {amenity.available ? 'Available' : 'Not Available'}: {amenity.description}
-                    </Box>
-                  ))}
-                </Box>
+                {renderAmenities(warehouse)}
               </TableCell>
               <TableCell>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                  {warehouse.operatingHours?.weekdays?.map((day, index) => (
-                    <Box
-                      key={index}
-                      sx={{
-                        fontSize: '0.75rem',
-                        color: theme.palette.text.secondary
-                      }}
-                    >
-                      {day.day}: {day.open} - {day.close}
-                    </Box>
-                  ))}
-                </Box>
+                {renderOperatingHours(warehouse)}
               </TableCell>
               <TableCell align="right">
                 <IconButton
@@ -157,4 +206,4 @@ const WarehouseTable: React.FC<WarehouseTableProps> = ({
   );
 };
 
-export default WarehouseTable; 
+export default WarehouseTable;

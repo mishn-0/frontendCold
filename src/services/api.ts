@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = '/API';
+const API_BASE_URL = 'https://coldstoragehub.onrender.com/API';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
